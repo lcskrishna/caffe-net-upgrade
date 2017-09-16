@@ -381,19 +381,78 @@ void loadCaffeModel(const char * fileName)
 
 }
 
+void removeUnknownTypes(std::string& str, const std::string& from, const std::string& to){
+	size_t start_pos = 0;
+	while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+	str.replace(start_pos, from.length(), to);
+	start_pos += to.length(); 
+    }
+}
+
+void loadPrototxt(const char * fileName)
+{
+	//verify the version of protobuf library
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+
+	//read the caffemodel.
+	caffe::NetParameter net_parameter;
+	std::cout << "INFO: Reading the prototxt file from : " << fileName << std::endl;
+	//Read the Prototxt File.
+    {
+	int fd = open(fileName,O_RDONLY);
+	if(fd < 0) {
+		std::cerr << "ERROR: Unable to open the file : " << fileName << std::endl;
+	}
+
+	google::protobuf::io::FileInputStream fi(fd);
+	fi.SetCloseOnDelete(true);
+	if(!google::protobuf::TextFormat::Parse(&fi, &net_parameter)) {
+		std::cerr << "ERROR: Failed to parse the file : " << fileName << std::endl;
+		exit(1);
+	}
+	else {
+		std::cout << "INFO: prototxt read successful " << std::endl;
+		//upgrade prototxt if needed.
+		caffe::NetParameter upgrade_net_parameter;
+		check_network_details(net_parameter, &upgrade_net_parameter);
+		std::cout << "STATUS: upgrade successful. " << std::endl;
+
+		//write defenition into a prototxt file.
+		std::fstream fs;
+		fs.open("net.prototxt", std::ios::out);
+		std::string out;
+		
+		if(google::protobuf::TextFormat::PrintToString(upgrade_net_parameter, &out)) {
+			std::cout << "INFO: upgraded net is written into net.prototxt" << std::endl;
+			removeUnknownTypes(out, "95:0", "");
+			fs << out ; 
+		}
+		else {
+			std::cout << "ERROR: Unable to write upgraded net to file " << std::endl;
+			exit(1);
+		}
+	}
+    }	
+}
+
 int main(int argc, char * argv[])
 {
-	const char * usage = "Usage: upgrade_layer_parameters <net.caffemodel>";
+	const char * usage = "Usage: upgrade_layer_parameters <net.caffemodel | net.prototxt> ";
 
 	//get options.
 	if(argc < 2 ) {
-		printf("%s",usage);
+		printf("%s\n",usage);
 		return -1;
 	}
 
 	const char * fileName = argv[1];
+
 	if(strstr(fileName,".caffemodel")) {
 		loadCaffeModel(fileName);
+	}
+	else if(strstr(fileName, ".prototxt")) {
+		std::cout << "Loading prototxt file ... " << std::endl;
+		loadPrototxt(fileName);
 	}
 
 	return 0;
