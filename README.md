@@ -1,5 +1,5 @@
-# caffe-binary-upgrade
-caffe-binary-upgrade is a tool which takes a caffemodel or a prototxt file as an input that is defined with V1LayerParameters. (Caffe deprecated definition) . 
+# caffe-net-upgrade
+caffe-net-upgrade is a tool which takes a caffemodel or a prototxt file as an input that is defined with V1LayerParameters. (Caffe deprecated definition) . 
 This implementation upgrades to the layer parameters. 
 
 ### Pre-requisites
