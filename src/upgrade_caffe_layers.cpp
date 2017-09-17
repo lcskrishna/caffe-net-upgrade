@@ -347,7 +347,7 @@ void check_network_details(const caffe::NetParameter& net_parameter, caffe::NetP
 	}
 }
 
-void loadCaffeModel(const char * fileName)
+void loadCaffeModel(const char * fileName , std::string& output_file_prefix)
 {
 	//verify the version of protobuf library
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -365,12 +365,13 @@ void loadCaffeModel(const char * fileName)
 			std::cout << "STATUS: Upgrade Successful" << std::endl;
 			
 			//write updated caffemodel.
-			std::fstream output("net.caffemodel", std::ios::out | std::ios::binary);
+			std::string out_file = output_file_prefix + ".caffemodel";
+			std::fstream output(out_file.c_str(), std::ios::out | std::ios::binary);
 			if(!upgraded_net_parameter.SerializeToOstream(&output)) {
 				std::cerr << "ERROR: Unable to write the upgraded caffemodel." << std::endl;
 			}
 			else {
-				std::cout << "INFO: Caffemodel written successfully into net.caffemodel." << std::endl;
+				std::cout << "INFO: upgraded file written successfully into " << out_file << std::endl;
 			}
 		}
 		else {
@@ -389,7 +390,7 @@ void removeUnknownTypes(std::string& str, const std::string& from, const std::st
     }
 }
 
-void loadPrototxt(const char * fileName)
+void loadPrototxt(const char * fileName , std::string& output_file_prefix)
 {
 	//verify the version of protobuf library
 	GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -419,11 +420,12 @@ void loadPrototxt(const char * fileName)
 
 		//write defenition into a prototxt file.
 		std::fstream fs;
-		fs.open("net.prototxt", std::ios::out);
+		std::string out_file = output_file_prefix + ".prototxt";
+		fs.open(out_file.c_str(), std::ios::out);
 		std::string out;
 		
 		if(google::protobuf::TextFormat::PrintToString(upgrade_net_parameter, &out)) {
-			std::cout << "INFO: upgraded net is written into net.prototxt" << std::endl;
+			std::cout << "INFO: upgraded net is written into " << out_file << std::endl;
 			removeUnknownTypes(out, "95:0", "");
 			fs << out ; 
 		}
@@ -437,7 +439,7 @@ void loadPrototxt(const char * fileName)
 
 int main(int argc, char * argv[])
 {
-	const char * usage = "Usage: upgrade_layer_parameters <net.caffemodel | net.prototxt> ";
+	const char * usage = "Usage: upgrade_layer_parameters <net.caffemodel | net.prototxt> [output_file_prefix]";
 
 	//get options.
 	if(argc < 2 ) {
@@ -446,13 +448,16 @@ int main(int argc, char * argv[])
 	}
 
 	const char * fileName = argv[1];
+	std::string output_file_prefix = "net";
+	if(argc > 2) output_file_prefix = argv[2];
 
 	if(strstr(fileName,".caffemodel")) {
-		loadCaffeModel(fileName);
+		std::cout << "Loading caffemodel file ... " << std::endl;
+		loadCaffeModel(fileName , output_file_prefix);
 	}
 	else if(strstr(fileName, ".prototxt")) {
 		std::cout << "Loading prototxt file ... " << std::endl;
-		loadPrototxt(fileName);
+		loadPrototxt(fileName , output_file_prefix);
 	}
 
 	return 0;
