@@ -9,9 +9,10 @@ This implementation upgrades to the layer parameters.
 
 ### Build Instructions
 1. Install the respective pre-requisites if not present. Make sure to install libprotobuf-dev and protobuf-compiler
+2. Navigate to the caffe-net-upgrade folder.
 2. mkdir build
 3. cd build
-4. cmake ../caffe-binary-upgrade .
+4. cmake ../
 5. make
 
 This automatically builds a executable in the build folder. 
