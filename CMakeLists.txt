@@ -1,6 +1,6 @@
 
 cmake_minimum_required (VERSION 2.8)
-project(caffe-binary-upgrade)
+project(caffe-net-upgrade)
 
 set (CMAKE_CXX_STANDARD 11)
 
