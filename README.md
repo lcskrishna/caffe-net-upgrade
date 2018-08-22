@@ -2,6 +2,9 @@
 caffe-net-upgrade is a tool which takes a caffemodel or a prototxt file as an input that is defined with V1LayerParameters. (Caffe deprecated definition) . 
 This implementation upgrades to the layer parameters. 
 
+
+**Note: This tool doesn't require installation of caffe to upgrade your model.**
+
 ### Pre-requisites
 1. Ubuntu 16.04
 2. CMake 2.8 or newer [download](https://cmake.org/download/)
